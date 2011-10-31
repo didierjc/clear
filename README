@@ -1,0 +1,31 @@
+Clear | Framework
+
+Model–View–Controller (MVC) : architectural pattern used in software engineering. Successful use of the pattern isolates business logic from user interface considerations, resulting in an application where it is easier to modify either the visual appearance of the application or the underlying business rules without affecting the other. In MVC, the model represents the data of the application; the view corresponds to elements of the user interface such as text, checkbox items, and so forth; and the controller manages the communication of data and the business rules used to manipulate the data to and from the model
+
+In Clearer words-
+
+1. Model handles all our database logic. Using the model we connect to our database and provide an abstraction layer.
+2. Controller represents all our business logic i.e. all of the ifs and else.
+3. View represents our presentation logic i.e our HTML/XML/JSON code.
+
+Directory Structure-
+
+1. application - application specific code 
+2. clear - framework code 
+3. configuration - database/server configuration
+4. public - all public requests goes here; .htaccess file in the root directory will redirect all calls to this folder
+5. scripts - command-line utilities
+6. tmp - temporary data
+
+Coding Conventions-
+
+1. database tables will always be lowercase, plural, begin with "clr_tbl_" i.e. clr_tbl_items, clr_tbl_cars, clr_tbl_users
+2. Models will always be lowercase, singular and begin with "mod_" i.e. mod_item, mod_car, mod_user
+3. Controllers will always be lowercase, plural and begin with "ctrl_" i.e. ctrl_items, ctrl_cars, ctrl_users
+4. Views will begin with "view_" and have the plural name followed by action name as the file i.e. view_items/view.php, view_cars/buy.php, view_users/add.php
+
+Bootstraping-
+
+* .htaccess file in the root directory will redirect all calls to the public folder
+
+

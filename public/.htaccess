@@ -1,0 +1,45 @@
+<IfModule mod_rewrite.c>
+# change the URLs into SEO friendly URLs with the help of PHP, mod_rewrite and .htaccess in Apache
+# search engines apply ranking based on the file name and path, putting relevant information in the core path instead of the query string can help boost 
+# site ranking considerably
+
+# These lines ensure that mod_rewrite is enabled and active
+Options +FollowSymLinks
+RewriteEngine On
+
+# Line 3 and 4 make sure that the path requested is not a filename or directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# http://www.htmlist.com/how-to/a-simplemod_rewrite-tutorial/
+# Each rule follows this form:
+#	RewriteRule PATTERN DESTINATION [FLAGS]
+# PATTERN:	is what we are looking for 
+# DESTINATION:	is what we are going to rewrite to
+# FLAGS:	are options you can set for each rewrite; optionally
+
+# The PATTERN portion of the rewrite rule typically begins with a carat, ^ and ends with a dollar sign, $ 
+# This syntax establishes the beginning and end of the pattern to match
+# PLEASE NOTE: these two symbols are optional, and including or excluding them can have different effects
+#		If only the carat (^) is used at the beginning, our PATTERN must appear at the beginning of the URL 
+#		If only the dollar ($) is used, our PATTERN must be at the end of the URL
+#		If both are used, our PATTERN can appear anywhere inside the URL
+
+# EXAMPLE: RewriteRule ([a-zA-z]+)/([a-zA-z]+)/([a-zA-z]+)/([0-9]+)$ index.php?operation=$3&state=$1&city=$2&limit=$4
+# EXAMPLE 2: RewriteRule ^page/([0-9])/([0-9]).html$ /page.php?id=$1&pagenum=$2
+RewriteRule ^(.*)$ index.php?url=$1 [PT,L]
+</IfModule>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
