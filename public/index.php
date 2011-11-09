@@ -16,11 +16,15 @@
 	// dumb to even worry about this anymore. Just use the *nix variety and you should be fine.
 	define('DS', '/'); 
 	define('ROOT', dirname(dirname(__FILE__))); // dirname — given a string containing the path of a file or directory, this function will return the parent directory's path.
-	
+	define('LIB', 'library');
+
+	// URL: 
 	$url = $_GET['url'];
 	
 	/*
 		the "bootstrapping" approach is responsible for requiring all of the needed MVC components used for displaying the page the user requested. By filtering all requests to a 
 		single file, we are able to use a development approach similar to traditional software development
+		
+		*** THIS FILE AUTOMATICALLY INCLUDES ALL NECESSARY FILES FOR THIS FRAMEWORK
 	*/
 	require_once(ROOT.DS.'clear'.DS.'bootstrap.php'); // all calls go via our index.php except for images/js/css

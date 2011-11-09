@@ -5,3 +5,5 @@
 	define('DB_USER', 'yourusername');
 	define('DB_PASSWORD', 'yourpassword');
 	define('DB_HOST', 'localhost');
+
+	define('BASE_PATH','http://localhost/clear.framework/');
