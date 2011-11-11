@@ -1,5 +1,10 @@
 <?php
-	
+	/*
+	 * Facebook Permissions:
+	 * 		http://developers.facebook.com/docs/reference/api/permissions/
+	 *
+	 */
+
 	require_once(ROOT.DS.LIB.DS.'facebook'.DS.'facebook.php');
 
 	class cf_Facebook{
@@ -9,14 +14,14 @@
 		protected $Permissions;
 		protected $CallBack;
 		protected $Application_URL;
-			
+
 		/**
 		 * setup the facebook login functionality!
-		 * 
+		 *
 		 * @param string $Application_Id
 		 * @param string $Application_Secret
 		 * @param string $Permissions
-		 * @param string $callback 
+		 * @param string $callback
 		 */
 		public function __construct($Application_Id, $Application_Secret, $Permissions = '', $CallBack = '', $Application_URL = ''){
 			$this->Application_Id = $Application_Id;
@@ -24,7 +29,7 @@
 			$this->Permissions = $Permissions;
 			$this->CallBack = $CallBack;
 			$this->Application_URL = $Application_URL;
-	
+
 			// Create An instance of our Facebook Application.
 			$this->_facebook = new Facebook(array(
 				'appId' => $this->Application_Id,
@@ -32,7 +37,19 @@
 				'cookie' => true
 			));
 		}
-	
+
+		public function setCallBack($CallBack){
+			$this->CallBack = $CallBack;
+		}
+
+		public function setPermissions($Permissions){
+			$this->Permissions = $Permissions;
+		}
+
+		public function setAppURL($Application_URL){
+			$this->Application_URL = $Application_URL;
+		}
+
 		public function getAccessToken(){
 			return $this->_facebook->getAccessToken();
 		}
@@ -51,11 +68,11 @@
 			);
 			return $this->api($param);
 		}
-		
+
 		public function FBlogout(){
 			setcookie ('fbs_'.$this->Application_Id, "", time() - 3600);
 		}
-		
+
 		public function getLogoutUrl($next){
 			$params = array('next'=>$next);
 			return $this->_facebook->getLogoutUrl($params);
@@ -68,7 +85,6 @@
 		public function connection(){
 			// Get the app User ID
 			$user = $facebook->getUser();
-			$me = NULL;
 
 			if($user){
 				try{
@@ -80,8 +96,7 @@
 				}
 			}
 
-			return "
-				<div id=\"fb-root\"></div>
+			return "<div id=\"fb-root\"></div>
 				<script>
 					window.fbAsyncInit = function(){
 						FB.init({
@@ -91,23 +106,20 @@
 							cookie  : true, // enable cookies to allow the server to access the session
 							xfbml   : true // parse XFBML
 						});
-			FB.Event.subscribe('auth.login', function()
-			{
-			window.location.reload();
-			});
-			};
-			
-			(function()
-			{
-			var e = document.createElement('script');
-			e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-			e.async = true;
-			document.getElementById('fb-root').appendChild(e);
-			}());
-			</script>
-			
-			<fb:login-button perms=\"" . $this->Permissions . "\" onlogin='" . $this->CallBack . "'>Connect</fb:login-button>
-			";
+						FB.Event.subscribe('auth.login', function(){
+							window.location.reload();
+						});
+					};
+
+					(function(){
+						var e = document.createElement('script');
+						e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+						e.async = true;
+						document.getElementById('fb-root').appendChild(e);
+					}());
+				</script>
+
+				<fb:login-button perms=\"".$this->Permissions."\" onlogin='".$this->CallBack."'>Connect</fb:login-button>";
 		}
 
 		public function getFBUID(){
@@ -120,7 +132,7 @@
 			}
 
 			$PermissionCheck = split(",", $this->Permissions);
-			
+
 			$a = str_ireplace(array("\\",'"'), "", $_REQUEST["fbs_" . $this->Application_Id]);
 			if(!$a){
 				return "Permission Disallow!";
@@ -154,5 +166,13 @@
 			}
 
 			return $Result;
+		}
+
+		public function fb_FQL($arrElements){
+			$fql = "select ".$arrElements[0]." from ".$arrElements[1]." where uid=".$this->getFBUID();
+			$param = array('method' => 'fql.query',
+							'query' => $fql,
+							'callback' => '');
+			return $this->_facebook->api($param);
 		}
 	}
