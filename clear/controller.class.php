@@ -1,30 +1,37 @@
 <?php
 	/*
-		used for all communication between the controller, the model and the view (template class). It creates an object for the model class and an object for template class. 
-		The object for model class has the same name as the model itself
+	 * used for all communication between the controller, the model and the view (template class).
+	 * It creates an object for the model class and an object for template class.
+	 * The object for model class has the same name as the model itself
 	*/
 	class Controller{
-		protected $_model;
 		protected $_controller;
 		protected $_action;
 		protected $_template;
 
-		function __construct($model, $controller, $action){
-			$this->_controller = $controller;
-			$this->_action = $action;
-			$this->_model = $model;
+		public $doNotRenderHeader;
+		public $render;
 
-			$this->$model = new $model;
-			$this->_template = new Template($controller,$action);
+		function __construct($controller, $action){
+			global $inflect;
+
+			$this->_controller = ucfirst($controller);
+			$this->_action = $action;
+
+			$model = ucfirst($inflect->singularize($controller));
+			$this->doNotRenderHeader = 0;
+			$this->render = 1;
+			$this->$model =& new $model;
+			$this->_template =& new Template($controller,$action);
 		}
 
-		function set($name,$value) {
+		function set($name,$value){
 			$this->_template->set($name,$value);
 		}
 
-		function __destruct() {
-			// while destroying the class we call the render() function which displays the view (template) file
-			// render() function is defined in the Template class
-			$this->_template->render();
+		function __destruct(){
+			if($this->render){
+				$this->_template->render($this->doNotRenderHeader);
+			}
 		}
 	}

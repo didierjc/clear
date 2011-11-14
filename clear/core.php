@@ -13,6 +13,25 @@
 		}
 	}
 
+	/** Secondary Call Function **/
+	function performAction($controller,$action,$queryString = null,$render = 0){
+		$controllerName = strtolower('controller_'.$controller);
+		$dispatch = new $controllerName($controller,$action);
+		$dispatch->render = $render;
+		return call_user_func_array(array($dispatch,$action),$queryString);
+	}
+
+	/** Routing **/
+	function routeURL($url){
+		global $routing;
+		foreach($routing as $pattern => $result){
+			if(preg_match($pattern, $url)){
+				return preg_replace($pattern, $result, $url);
+			}
+		}
+		return ($url);
+	}
+
 	/** Main Call Function **/
 	/*
 		our URLs will look - yoursite.com/controllerName/actionName/queryString
@@ -27,44 +46,59 @@
 			Action		=> del
 			Query String is an array (1,first-item)
 
-		After the separation is done, it creates a new object of the class $controller.â€Controllerâ€ and calls the method $action of the class.
+		After the separation is done, it creates a new object of the class ”controller_”.$controller and calls the method $action of the class.
 	*/
 	function callHook() {
 		global $url;
+		global $default;
 
-		$urlArray = array();
-		$urlArray = explode("/",$url); // break apart the URL, using "/" as the delimiter
+		$queryString = array();
 
-		// identify the Controller
-		// Controllers will always be lowercase, plural and begin with "ctrl_" i.e. ctrl_items, ctrl_cars, ctrl_users
-		$controller = $urlArray[0];
-		$controller = strtolower($controller);
-		$controllerName = 'ctrl_'.$controller; //$controllerName is the file name of the controller file
-		$controllerClass = 'controller_'.$controller; //$controllerName is the file name of the controller file
-		array_shift($urlArray); // array_shift | shifts the first value of the array off and returns the array, minus one element and moving everything down
+		if(!isset($url)){ // $url is set in public/index.php -- line 24
+			$controller = $default['controller']; // this is set in configuration/routing.php -- line 16
+			$action = $default['action']; // this is set in configuration/routing.php -- line 17
+		}else{
+			$url = routeURL($url); // look at line 25
+			$urlArray = array();
+			$urlArray = explode("/",$url); // break apart the URL, using "/" as the delimiter
+			// identify the Controller
+			// Controllers will always be lowercase, plural and begin with "controller_" i.e. ctrl_items, ctrl_cars, ctrl_users
+			$controller = strtolower($urlArray[0]);
+			array_shift($urlArray); // array_shift | shifts the first value of the array off and returns the array, minus one element and moving everything down
+			if(isset($urlArray[0])){
+				$action = $urlArray[0];
+				array_shift($urlArray); // array_shift | shifts the first value of the array off and returns the array, minus one element and moving everything down
+			}else{
+				$action = 'index'; // Default Action
+			}
+			$queryString = $urlArray; // the remainder of the array is the query string
+		}
 
-		$action = $urlArray[0];
-		array_shift($urlArray);
+		$controllerName = strtolower('controller_'.$controller); //$controllerName is the file & class name of the controller
+		$dispatch = new $controllerName($controller,$action);
 
-		$queryString = $urlArray; // the remainder of the array is the query string
-
-		$model = rtrim($controller, 's');
-		$model = strtolower('mod_'.$model); // Models will always be lowercase, singular and begin with "mod_" i.e. mod_item, mod_car, mod_user
-
-		$dispatch = new $controllerClass($model,$controllerName,$action);
-
-		// method_exists â€” Checks if the class method exists -- If in this class: $controllerClass, this method: $action exists...
+		// method_exists — Checks if the class method exists -- If in this class: $controllerClass, this method: $action exists...
 		// the (int) part casts it as an integer so it will display 0 if false and 1 if true
-		if((int)method_exists($controllerClass, $action)){
-			// Call a user function -- the parameters to be passed to the function as an indexed array
-			call_user_func_array(array($dispatch,$action), $queryString);
+		if ((int)method_exists($controllerName, $action)) {
+			// call_user_func_array — Call a user function given with an array of parameters
+			/*
+			* primarily useful as a way to dynamically call functions and methods at runtime without having to use eval() 
+			* call_user_func_array() passes the elements in argument_array to function_name as an argument list. This makes it easy to pass an unknown number 
+			* of arguments to a function.
+			* 
+			* Normally, functions are called with the following syntax: function_name('arg one', 'arg two', ...);
+			* Calling the same function using call_user_func_array() would look like this: call_user_func_array ('function_name', array ('arg one', 'arg two', ...));
+			*/
+			call_user_func_array(array($dispatch,"beforeAction"),$queryString);
+			call_user_func_array(array($dispatch,$action),$queryString);
+			call_user_func_array(array($dispatch,"afterAction"),$queryString);
 		}else{
 			/* Error Generation Code Here */
 		}
 	}
 
 	/** Autoload any classes that are required **/
-	function __autoload($className) {
+	function __autoload($className){
 		if(file_exists(ROOT.DS.'clear'.DS.strtolower($className).'.class.php')){
 			require_once(ROOT.DS.'clear'.DS.strtolower($className).'.class.php');
 		}else if(file_exists(ROOT.DS.'application'.DS.'controllers'.DS.strtolower($className).'.php')){
@@ -76,5 +110,9 @@
 		}
 	}
 
+	$cache = new Cache();
+	$inflect = new Inflection();
+
 	setReporting();
 	callHook();
+?>

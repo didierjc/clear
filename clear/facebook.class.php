@@ -7,7 +7,7 @@
 
 	require_once(ROOT.DS.LIB.DS.'facebook'.DS.'facebook.php');
 
-	class cf_Facebook{
+	class cf_Facebook extends Facebook{
 		protected $_facebook;
 		protected $Application_Id;
 		protected $Application_Secret;
@@ -174,5 +174,40 @@
 							'query' => $fql,
 							'callback' => '');
 			return $this->_facebook->api($param);
+		}
+
+		/**
+		* Get Friend List
+		*
+		* This function will retrieve the friend list of any given facebook user id. Optionally, it allows a few parameters to
+		* customize the list.
+		*
+		*/
+		public function getFriendList($fbuserId, $appUser = false, $start = 0, $limit = 0){
+			// Does the friends need to add the app to be qualified
+			if ($appUser == false){
+				$usersArray = $this->_facebook->api_client->fql_query("SELECT uid FROM user WHERE uid IN
+				(SELECT uid2 FROM friend WHERE uid1 = {$this->getFBUID()})");
+			}else{
+				$usersArray = $this->_facebook->api_client->fql_query("SELECT uid FROM user WHERE has_added_app = 1 AND uid IN
+				(SELECT uid2 FROM friend WHERE uid1 = {$this->getFBUID()})");
+			}
+
+			if(empty($usersArray)){
+				return array();
+			}
+
+			// Make an array of the friends
+			foreach($usersArray as $user){
+				$users[] = $user['uid'];
+			}
+
+			// Put a limit of the friends if specified
+			if ($appUser && !empty($users) && $limit){
+				$users = array_slice($users, $start, $limit);
+			}
+
+			// Return the friend list
+			return $users;
 		}
 	}

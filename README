@@ -13,15 +13,17 @@ Directory Structure-
 1. application - application specific code 
 2. clear - framework code 
 3. configuration - database/server configuration
-4. public - all public requests goes here; .htaccess file in the root directory will redirect all calls to this folder
-5. scripts - command-line utilities
-6. tmp - temporary data
+4. library - 3rd party classes, i.e. Facebook, Twitter, HTMLPurify, etc.
+5. public - all public requests goes here; .htaccess file in the root directory will redirect all calls to this folder
+6. scripts - command-line utilities
+7. skins - theming engine
+8. tmp - temporary data
 
 Coding Conventions-
 
 1. database tables will always be lowercase, plural, begin with "clr_tbl_" i.e. clr_tbl_items, clr_tbl_cars, clr_tbl_users
-2. Models will always be lowercase, singular and begin with "mod_" i.e. mod_item, mod_car, mod_user
-3. Controllers will always be lowercase, plural and begin with "ctrl_" i.e. ctrl_items, ctrl_cars, ctrl_users
+2. Model files & classes will always be lowercase, singular and begin with "model_" i.e. model_item, model_car, model_user
+3. Controller files & classes will always be lowercase, plural and begin with "controller_" i.e. controller_items, controller_cars, controller_users
 4. Views will begin with "view_" and have the plural name followed by action name as the file i.e. view_items/view.php, view_cars/buy.php, view_users/add.php
 
 Bootstraping-
